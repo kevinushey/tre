@@ -1074,6 +1074,8 @@ main(int argc, char **argv)
   test_comp("[^]", 0, REG_EBRACK);
   test_comp("[a-", 0, REG_EBRACK);
   test_comp("[^-", 0, REG_EBRACK);
+  test_comp("[[:alpha:", 0, REG_ECTYPE);
+  test_comp("[[:alpha:]", 0, REG_EBRACK);
 
   test_comp("[]x]", 0, 0);
   test_exec("]", 0, REG_OK, 0, 1, END);
