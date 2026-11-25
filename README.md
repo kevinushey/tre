@@ -1,3 +1,11 @@
+Notice
+======
+
+This repository is a fork of the upstream TRE project at
+<https://github.com/laurikari/tre>.  The original upstream README
+follows below.
+
+
 Introduction
 ============
 
