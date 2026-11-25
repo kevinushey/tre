@@ -2,7 +2,8 @@ Notice
 ======
 
 This repository is a fork of the upstream TRE project at
-<https://github.com/laurikari/tre>.  The original upstream README
+<https://github.com/laurikari/tre>.  The primary maintained branch
+for this fork is `r-integration`.  The original upstream README
 follows below.
 
 
