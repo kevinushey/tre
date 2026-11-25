@@ -1462,6 +1462,19 @@ main(int argc, char **argv)
   test_exec("aax xxx", 0, REG_OK, 2, 3, END);
   test_comp("\\<.", REG_EXTENDED, 0);
   test_exec(";xaa", 0, REG_OK, 1, 2, END);
+  /* \b and \B see a non-word character before and after the string. */
+  test_comp("\\b", REG_EXTENDED, 0);
+  test_exec(" a", 0, REG_OK, 1, 1, END);
+  test_exec(" ", 0, REG_NOMATCH);
+  test_exec("", 0, REG_NOMATCH);
+  test_comp("\\B", REG_EXTENDED, 0);
+  test_exec(" a", 0, REG_OK, 0, 0, END);
+  test_exec("a", 0, REG_NOMATCH);
+  test_exec("", 0, REG_OK, 0, 0, END);
+  test_comp(" \\b", REG_EXTENDED, 0);
+  test_exec("a ", 0, REG_NOMATCH);
+  test_comp(" \\B", REG_EXTENDED, 0);
+  test_exec("a ", 0, REG_OK, 1, 2, END);
 
   /* Zero-width assertions inside alternations and optional groups.  Every
      empty path through a nullable subexpression must be kept, not only the
