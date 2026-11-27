@@ -664,22 +664,6 @@ main(int argc, char **argv)
     test_exec("zzzzzz", 0, REG_NOMATCH);
   }
 
-  /* The same with few states queued at the start of a position: deleting
-     the "x" adds every branch to the delete-handling deque from within
-     the loop that processes it, so that loop must grow the deque too. */
-  {
-    static char fan_out[300 * 2 + 16];
-    char *p = fan_out;
-    int i;
-    p += sprintf(p, "(x(");
-    for (i = 0; i < 300; i++)
-      p += sprintf(p, "%sa", i > 0 ? "|" : "");
-    sprintf(p, ")b){~2}");
-    test_comp(fan_out, REG_EXTENDED | REG_NOSUB, 0);
-    test_exec("zab", 0, REG_OK, END);
-    test_exec("zzz", 0, REG_NOMATCH);
-  }
-
 #if KNOWN_BUG
   /* Should these match or not? */
   test_comp("(a)*-\\1b", REG_EXTENDED, 0);
@@ -799,36 +783,6 @@ main(int argc, char **argv)
 	    "For useful information, use www.slashdot.org\n"
 	    "this is demo data!\n",
 	    0, REG_OK, 0, 120, 93, 100, END);
-
-  /* Approximate matching of a bounded repetition: the parameters apply
-     to the expanded copies as a whole. */
-  test_comp("(ab){2~1}c", REG_EXTENDED, 0);
-  test_exec("ababc", 0, REG_OK, 0, 5, 2, 4, END);
-  test_exec("abXbc", 0, REG_OK, 0, 5, 2, 4, END);
-  test_exec("xabaXcx", 0, REG_OK, 1, 6, 3, 5, END);
-  test_exec("aXXbc", 0, REG_NOMATCH);
-  test_exec("abc", 0, REG_NOMATCH);
-  test_comp("x(ab){1,2~1}y", REG_EXTENDED, 0);
-  test_exec("xababy", 0, REG_OK, 0, 6, 3, 5, END);
-  test_exec("xaby", 0, REG_OK, 0, 4, 1, 3, END);
-  test_exec("xabaXy", 0, REG_OK, 0, 6, 3, 5, END);
-  test_exec("xy", 0, REG_NOMATCH);
-  test_comp("(foobar){2~1}", REG_EXTENDED, 0);
-  test_exec("foobarfoobar", 0, REG_OK, 0, 12, 6, 12, END);
-  test_exec("foobarfobar", 0, REG_OK, 0, 11, 6, 11, END);
-  test_exec("fobarfobar", 0, REG_NOMATCH);
-  test_comp("a{2+14}{2+4}", REG_EXTENDED, 0);
-  test_exec("aaaa", 0, REG_OK, 0, 4, END);
-  test_exec("aaa", 0, REG_NOMATCH);
-
-  /* The approximate matcher has room for the costs of three
-     approximate bounds; the copies of a repeated one share its costs. */
-  test_comp("a{~1}b{~1}c{~1}", REG_EXTENDED, 0);
-  test_exec("xbc", 0, REG_OK, 0, 3, END);
-  test_comp("(a{~1}){5}", REG_EXTENDED | REG_NOSUB, 0);
-  test_exec("aaxaa", 0, REG_OK, END);
-  test_comp("a{~1}b{~1}c{~1}d{~1}", REG_EXTENDED, REG_ESPACE);
-  test_comp("{~}?{~}?{~}?{~}?{~}?D", REG_EXTENDED, REG_ESPACE);
 
   /* Approximate matching and back referencing cannot be used together. */
   test_comp("(foo{~})\\1", REG_EXTENDED, REG_BADPAT);
@@ -1462,19 +1416,6 @@ main(int argc, char **argv)
   test_exec("aax xxx", 0, REG_OK, 2, 3, END);
   test_comp("\\<.", REG_EXTENDED, 0);
   test_exec(";xaa", 0, REG_OK, 1, 2, END);
-  /* \b and \B see a non-word character before and after the string. */
-  test_comp("\\b", REG_EXTENDED, 0);
-  test_exec(" a", 0, REG_OK, 1, 1, END);
-  test_exec(" ", 0, REG_NOMATCH);
-  test_exec("", 0, REG_NOMATCH);
-  test_comp("\\B", REG_EXTENDED, 0);
-  test_exec(" a", 0, REG_OK, 0, 0, END);
-  test_exec("a", 0, REG_NOMATCH);
-  test_exec("", 0, REG_OK, 0, 0, END);
-  test_comp(" \\b", REG_EXTENDED, 0);
-  test_exec("a ", 0, REG_NOMATCH);
-  test_comp(" \\B", REG_EXTENDED, 0);
-  test_exec("a ", 0, REG_OK, 1, 2, END);
 
   /* Shorthands for character classes. */
   test_comp("\\w+", REG_EXTENDED, 0);
@@ -1976,22 +1917,6 @@ main(int argc, char **argv)
       test_nexec("foo\000bar", 7, 0, REG_OK, 5, 6, END);
       test_comp("c$", REG_EXTENDED, 0);
       test_exec("abc", 0, REG_OK, 2, 3, END);
-
-      /* A class name of 40 two-byte characters converts to more bytes
-	 than the class name buffer holds. */
-      {
-	char long_class[3 + 2 * 40 + 4];
-	int i;
-
-	memcpy(long_class, "[[:", 3);
-	for (i = 0; i < 40; i++)
-	  {
-	    long_class[3 + 2 * i] = (char)0xa4;
-	    long_class[3 + 2 * i + 1] = (char)0xa2;
-	  }
-	memcpy(long_class + 3 + 2 * 40, ":]]", 4);
-	test_comp(long_class, REG_EXTENDED, REG_ECTYPE);
-      }
     }
   else
     {

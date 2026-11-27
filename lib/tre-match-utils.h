@@ -154,9 +154,11 @@
    || ((assertions & ASSERT_AT_EOW)					      \
        && (!IS_WORD_CHAR(prev_c) || IS_WORD_CHAR(next_c)))		      \
    || ((assertions & ASSERT_AT_WB)					      \
-       && IS_WORD_CHAR(prev_c) == IS_WORD_CHAR(next_c))			      \
+       && (pos != 0 && next_c != L'\0'					      \
+	   && IS_WORD_CHAR(prev_c) == IS_WORD_CHAR(next_c)))		      \
    || ((assertions & ASSERT_AT_WB_NEG)					      \
-       && IS_WORD_CHAR(prev_c) != IS_WORD_CHAR(next_c)))
+       && (pos == 0 || next_c == L'\0'					      \
+	   || IS_WORD_CHAR(prev_c) != IS_WORD_CHAR(next_c))))
 
 #define CHECK_CHAR_CLASSES(trans_i, tnfa, eflags)                             \
   (((trans_i->assertions & ASSERT_CHAR_CLASS)                                 \
